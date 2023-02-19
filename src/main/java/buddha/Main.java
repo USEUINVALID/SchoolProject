@@ -15,6 +15,17 @@ import java.io.File;
 
 public final class Main extends Application {
 
+    public final String buttonStyle =
+            """
+            -fx-border-color: #4287f5;
+            -fx-border-width: 5px;
+            
+            -fx-background-color: #00ccff;
+            
+            -fx-text-fill: #a200ff;
+            -fx-font-size: 2em;
+            """;
+
     @Override
     public void start(final Stage stage) {
         stage.setTitle("Image Compressor v0.1-pre-alpha");
@@ -25,7 +36,10 @@ public final class Main extends Application {
         fileChooser.getExtensionFilters().add(new ExtensionFilter("Image", "*.png", "*.jpg", "*.jpeg"));
 
         var openOne = new Button("Open one image...");
-        openOne.setOnAction(e -> {
+        openOne.setPrefSize(640, 320);
+
+        //openOne.setStyle(buttonStyle);
+        openOne.setOnAction(event -> {
             var file = fileChooser.showOpenDialog(stage);
             if (file == null) return;
 
@@ -33,6 +47,9 @@ public final class Main extends Application {
         });
 
         var openMany = new Button("Open many images...");
+        openMany.setPrefSize(640, 320);
+
+        openMany.setStyle(buttonStyle);
         openMany.setOnAction(event -> {
             var files = fileChooser.showOpenMultipleDialog(stage);
             if (files == null) return;
@@ -48,11 +65,10 @@ public final class Main extends Application {
         pane.setVgap(24);
         pane.getChildren().addAll(openOne, openMany);
 
-        var root = new VBox(48);
-        root.getChildren().addAll(pane);
-        root.setPadding(new Insets(48, 48, 48, 48));
+        var root = new VBox(40, openOne, openMany);
+        root.setPadding(new Insets(40, 40, 40, 40));
 
-        stage.setScene(new Scene(root));
+        stage.setScene(new Scene(root, 720, 480));
         stage.show();
     }
 
