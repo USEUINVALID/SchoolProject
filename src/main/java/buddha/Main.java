@@ -57,14 +57,6 @@ public final class Main extends Application {
             files.forEach(this::openFile);
         });
 
-        GridPane.setConstraints(openOne, 0, 0);
-        GridPane.setConstraints(openMany, 1, 0);
-
-        var pane = new GridPane();
-        pane.setHgap(24);
-        pane.setVgap(24);
-        pane.getChildren().addAll(openOne, openMany);
-
         var root = new VBox(40, openOne, openMany);
         root.setPadding(new Insets(40, 40, 40, 40));
 
