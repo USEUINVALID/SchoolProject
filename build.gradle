@@ -1,0 +1,60 @@
+// Добавляем плагин JavaFX
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
+}
+
+// Настраиваем плагин JavaFX
+javafx {
+    version = "19"
+    modules = [ 'javafx.controls' ]
+}
+
+// Добавляем плагин Java
+apply plugin: 'java'
+
+// Настраиваем кодировку файлов
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+// Настраиваем версию для Jabel
+configure([tasks.compileJava]) {
+    sourceCompatibility = 16 // Пишем код на Java 16
+    options.release = 8      // Запускаем код на Java 8
+
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(16)
+    }
+}
+
+// Добавляем репозитории для зависимостей
+repositories {
+    mavenCentral()
+    maven { url 'https://www.jitpack.io' }
+}
+
+// Задаем версии зависимостей
+ext {
+    jabelVersion = "0.4.2"
+}
+
+// Добавляем зависимости
+dependencies {
+    compileOnly "com.github.bsideup.jabel:jabel-javac-plugin:$jabelVersion"
+    annotationProcessor "com.github.bsideup.jabel:jabel-javac-plugin:$jabelVersion"
+}
+
+// Собираем приложение в исполняемый файл
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    manifest {
+        attributes("Main-Class": "buddha.Main")
+    }
+}
+
+rootProject.tasks.named("jar") {
+    duplicatesStrategy = 'include'
+}
