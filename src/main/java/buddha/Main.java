@@ -4,7 +4,6 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -17,13 +16,10 @@ public final class Main extends Application {
 
     public final String buttonStyle =
             """
-            -fx-border-color: #4287f5;
-            -fx-border-width: 5px;
-            
-            -fx-background-color: #00ccff;
-            
-            -fx-text-fill: #a200ff;
-            -fx-font-size: 2em;
+            -fx-background-color: linear-gradient(#ff5400, #be1d00);
+            -fx-background-radius: 30;
+            -fx-background-insets: 0;
+            -fx-text-fill: white;
             """;
 
     @Override
@@ -36,9 +32,9 @@ public final class Main extends Application {
         fileChooser.getExtensionFilters().add(new ExtensionFilter("Image", "*.png", "*.jpg", "*.jpeg"));
 
         var openOne = new Button("Open one image...");
-        openOne.setPrefSize(640, 320);
+        openOne.setPrefSize(480, 240);
 
-        //openOne.setStyle(buttonStyle);
+        openOne.setStyle(buttonStyle);
         openOne.setOnAction(event -> {
             var file = fileChooser.showOpenDialog(stage);
             if (file == null) return;
@@ -47,7 +43,7 @@ public final class Main extends Application {
         });
 
         var openMany = new Button("Open many images...");
-        openMany.setPrefSize(640, 320);
+        openMany.setPrefSize(480, 240);
 
         openMany.setStyle(buttonStyle);
         openMany.setOnAction(event -> {
@@ -60,7 +56,7 @@ public final class Main extends Application {
         var root = new VBox(40, openOne, openMany);
         root.setPadding(new Insets(40, 40, 40, 40));
 
-        stage.setScene(new Scene(root, 720, 480));
+        stage.setScene(new Scene(root, 560, 320));
         stage.show();
     }
 
@@ -71,6 +67,7 @@ public final class Main extends Application {
     public void openFile(File file) {
         try {
             Desktop.getDesktop().open(file);
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
     }
 }
