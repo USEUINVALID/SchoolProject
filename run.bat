@@ -1,1 +1,0 @@
-java --module-path "javafx/lib" --add-modules javafx.controls,javafx.fxml -jar "build/libs/SchoolProject.jar"
