@@ -1,7 +1,7 @@
 package buddha;
 
 import arc.ApplicationCore;
-import arc.Files;
+import arc.Files.FileType;
 import arc.backend.sdl.SdlApplication;
 import arc.backend.sdl.SdlConfig;
 import arc.graphics.g2d.SortedSpriteBatch;
@@ -25,9 +25,12 @@ public final class Main extends ApplicationCore {
             title = "Image Compressor v0.1-pre-alpha";
 
             width = 800;
-            height = 600;
+            height = 800;
 
-            setWindowIcon(Files.FileType.internal, "test.png");
+            resizable = false;
+            disableAudio = true;
+
+            setWindowIcon(FileType.internal, "test.png");
         }});
     }
 

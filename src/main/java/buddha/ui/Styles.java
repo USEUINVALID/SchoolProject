@@ -3,8 +3,9 @@ package buddha.ui;
 import arc.graphics.Color;
 import arc.scene.ui.Button.ButtonStyle;
 import arc.scene.ui.ImageButton.ImageButtonStyle;
-import arc.scene.ui.Label;
 import arc.scene.ui.Label.LabelStyle;
+import arc.scene.ui.Slider;
+import arc.scene.ui.Slider.SliderStyle;
 import arc.scene.ui.TextButton.TextButtonStyle;
 
 import static arc.Core.scene;
@@ -34,6 +35,16 @@ public class Styles {
             up = Textures.button;
             over = Textures.button_over;
             disabled = Textures.button_disabled;
+        }});
+
+        scene.addStyle(SliderStyle.class, new SliderStyle() {{
+            background = Textures.empty;
+            knobBefore = Textures.slider_before;
+            knobAfter = Textures.slider_after;
+
+            knob = Textures.slider_knob;
+            knobOver = Textures.slider_knob_over;
+            knobDown = Textures.slider_knob_down;
         }});
 
         scene.addStyle(LabelStyle.class, new LabelStyle() {{
