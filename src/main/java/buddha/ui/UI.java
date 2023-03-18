@@ -4,29 +4,33 @@ import arc.ApplicationListener;
 import arc.files.Fi;
 import arc.graphics.Color;
 import arc.graphics.Pixmap;
+import arc.graphics.PixmapIO;
 import arc.graphics.Texture;
 import arc.graphics.g2d.TextureRegion;
 import arc.scene.event.Touchable;
 import arc.scene.ui.Image;
+import arc.scene.ui.Label;
 import arc.scene.ui.layout.WidgetGroup;
-import arc.util.Align;
-import arc.util.Log;
-import arc.util.OS;
-import arc.util.Threads;
-import buddha.encoder.Compressor;
+import arc.util.*;
+import buddha.compressor.AverageColorCompressor;
+import buddha.compressor.FractalCompressor;
 import buddha.utils.FileChooserFilter;
 
 import javax.swing.*;
 
 import static arc.Core.*;
-import static buddha.encoder.Compressor.*;
+import static buddha.compressor.AverageColorCompressor.blockSize;
 
 public class UI implements ApplicationListener {
 
     public final WidgetGroup root = new WidgetGroup();
+    public final Fi tempFile = Fi.tempFile("compressor");
 
     public Fi selected;
+    public JFileChooser chooser;
+
     public Image source, result;
+    public Label sourceSize, resultSize;
 
     @Override
     public void init() {
@@ -37,25 +41,39 @@ public class UI implements ApplicationListener {
         root.touchable = Touchable.childrenOnly;
 
         root.fill(table -> {
-            source = table.image(Textures.error).center().pad(48f, 48f, 48f, 48f).size(300f).get();
-            result = table.image(Textures.error).center().pad(48f, 48f, 48f, 48f).size(300f).get();
+            table.top();
+
+            source = table.image(Textures.error).scaling(Scaling.fit).pad(32f, 32f, 32f, 32f).size(320f).get();
+            result = table.image(Textures.error).scaling(Scaling.fit).pad(32f, 32f, 32f, 32f).size(320f).get();
 
             table.row();
 
-            table.table(sliders -> {
-                sliders.label(() -> "Размер блока: [yellow]" + domainBlocksSize).labelAlign(Align.center).touchable(Touchable.disabled).labelAlign(Align.left).left().row();
-                sliders.slider(1, 32, 1, domainBlocksSize, value -> domainBlocksSize = (int) value).padTop(24f).width(240f);
+            sourceSize = table.add("").get();
+            resultSize = table.add("").get();
+        });
 
-                sliders.row();
+        root.fill(table -> {
+            table.center();
 
-                sliders.label(() -> "Ранговых блоков в доменном: [yellow]" + rangeBlocksPerDomain).labelAlign(Align.center).touchable(Touchable.disabled).padTop(32f).labelAlign(Align.left).left().row();
-                sliders.slider(2, 16, 1, rangeBlocksPerDomain, value -> rangeBlocksPerDomain = (int) value).padTop(24f).width(240f);
-            }).center();
+            // TODO
+        });
+
+        root.fill(table -> {
+            table.bottom();
+
+            table.label(() -> "Размер блока: [yellow]" + blockSize).labelAlign(Align.center).touchable(Touchable.disabled).labelAlign(Align.left).left().row();
+            table.slider(1, 128, 1, blockSize, value -> blockSize = (int) value).padTop(24f).width(240f).align(Align.left);
+
 
             table.row();
 
-            table.button("Выбрать файл", this::showFileChooser).center().width(320f).height(80f).padTop(40f);
-            table.button("Сжать изображение", this::compressImage).disabled(button -> selected == null || !selected.exists()).center().width(320f).height(80f).padTop(40f);
+            table.label(() -> "Уровень сжатия: [yellow]ничего не делает").labelAlign(Align.center).touchable(Touchable.disabled).padTop(32f).labelAlign(Align.left).left().row();
+            table.slider(2, 16, 1, 0, value -> {}).padTop(24f).width(240f).align(Align.left);
+
+            table.row();
+
+            table.button("Выбрать файл", this::showFileChooser).disabled(button -> chooser != null && chooser.isShowing()).center().width(320f).height(80f).pad(24f, 0f, 24f, 6f);
+            table.button("Сжать изображение", this::compressImage).disabled(button -> selected == null || !selected.exists()).center().width(320f).height(80f).pad(24f, 6f, 24f, 0f);
         });
     }
 
@@ -72,9 +90,14 @@ public class UI implements ApplicationListener {
         scene.resize(width, height);
     }
 
+    @Override
+    public void dispose() {
+        chooser.cancelSelection();
+    }
+
     public void showFileChooser() {
         Threads.daemon(() -> {
-            var chooser = new JFileChooser(OS.userHome);
+            chooser = new JFileChooser(OS.userHome);
             chooser.setDialogTitle("Выберите изображение для сжатия...");
 
             chooser.setAcceptAllFileFilterUsed(false);
@@ -91,7 +114,7 @@ public class UI implements ApplicationListener {
     public void compressImage() {
         Threads.daemon(() -> {
             try {
-                var result = Compressor.compress(Compressor.scale(new Pixmap(selected)));
+                var result = FractalCompressor.compress(new Pixmap(selected));
                 app.post(() -> updateResult(result));
             } catch (Exception e) {
                 Log.err(e);
@@ -102,11 +125,30 @@ public class UI implements ApplicationListener {
     public void updateSelected(Fi selected) {
         this.selected = selected;
 
-        this.source.setDrawable(new TextureRegion(new Texture(new Pixmap(selected))));
+        updateImage(source, sourceSize, "Размер до:[yellow]", new Pixmap(selected));
+
         this.result.setDrawable(Textures.error);
+        this.resultSize.setText("");
     }
 
-    public void updateResult(Pixmap result) {
-        this.result.setDrawable(new TextureRegion(new Texture(result)));
+    public void updateResult(Pixmap pixmap) {
+        updateImage(result, resultSize, "Размер после:[yellow]", pixmap);
+    }
+
+    public void updateImage(Image image, Label label, String text, Pixmap pixmap) {
+        try {
+            image.setDrawable(new TextureRegion(new Texture(pixmap)));
+            label.setText(text + " " + getSize(pixmap));
+        } catch (Exception e) {
+            image.setDrawable(Textures.error);
+            label.setText("[scarlet]Ошибка получения данных файла");
+        }
+    }
+
+    public String getSize(Pixmap pixmap) {
+        PixmapIO.writePng(tempFile, pixmap);
+        long size = tempFile.length();
+
+        return size > 1024 * 1024 ? Strings.autoFixed(size / 1024f / 1024f, 2) + " мбайт" : Strings.autoFixed(size / 1024f, 2) + " кбайт";
     }
 }
