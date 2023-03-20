@@ -8,18 +8,16 @@ import arc.graphics.PixmapIO;
 import arc.graphics.Texture;
 import arc.graphics.g2d.TextureRegion;
 import arc.scene.event.Touchable;
-import arc.scene.ui.Image;
-import arc.scene.ui.Label;
+import arc.scene.ui.*;
+import arc.scene.ui.ProgressBar.ProgressBarStyle;
 import arc.scene.ui.layout.WidgetGroup;
 import arc.util.*;
-import buddha.compressor.AverageColorCompressor;
-import buddha.compressor.FractalCompressor;
+import buddha.compressor.*;
 import buddha.utils.FileChooserFilter;
 
 import javax.swing.*;
 
 import static arc.Core.*;
-import static buddha.compressor.AverageColorCompressor.blockSize;
 
 public class UI implements ApplicationListener {
 
@@ -28,6 +26,10 @@ public class UI implements ApplicationListener {
 
     public Fi selected;
     public JFileChooser chooser;
+
+    public Compressor average = new AverageColorCompressor();
+    public Compressor fractal = new FractalCompressor();
+    public Compressor compressor = average;
 
     public Image source, result;
     public Label sourceSize, resultSize;
@@ -49,28 +51,25 @@ public class UI implements ApplicationListener {
             table.row();
 
             sourceSize = table.add("").get();
-            resultSize = table.add("").get();
+            resultSize = table.add("").visible(() -> !compressor.compressing()).get();
         });
 
         root.fill(table -> {
             table.center();
 
-            // TODO
+            table.add(new ProgressBar(0f, 100f, 0.1f, false, scene.getStyle(ProgressBarStyle.class)))
+                    .visible(compressor::compressing)
+                    .update(bar -> bar.setValue(compressor.progress()))
+                    .width(330f)
+                    .padLeft(385f)
+                    .get();
+
+            table.row();
+            table.label(() -> Strings.autoFixed(compressor.progress(), 2) + "%").visible(compressor::compressing).padLeft(385f);
         });
 
         root.fill(table -> {
-            table.bottom();
-
-            table.label(() -> "Размер блока: [yellow]" + blockSize).labelAlign(Align.center).touchable(Touchable.disabled).labelAlign(Align.left).left().row();
-            table.slider(1, 128, 1, blockSize, value -> blockSize = (int) value).padTop(24f).width(240f).align(Align.left);
-
-
-            table.row();
-
-            table.label(() -> "Уровень сжатия: [yellow]ничего не делает").labelAlign(Align.center).touchable(Touchable.disabled).padTop(32f).labelAlign(Align.left).left().row();
-            table.slider(2, 16, 1, 0, value -> {}).padTop(24f).width(240f).align(Align.left);
-
-            table.row();
+            compressor.build(table).row();
 
             table.button("Выбрать файл", this::showFileChooser).disabled(button -> chooser != null && chooser.isShowing()).center().width(320f).height(80f).pad(24f, 0f, 24f, 6f);
             table.button("Сжать изображение", this::compressImage).disabled(button -> selected == null || !selected.exists()).center().width(320f).height(80f).pad(24f, 6f, 24f, 0f);
@@ -114,7 +113,7 @@ public class UI implements ApplicationListener {
     public void compressImage() {
         Threads.daemon(() -> {
             try {
-                var result = FractalCompressor.compress(new Pixmap(selected));
+                var result = compressor.compress(new Pixmap(selected));
                 app.post(() -> updateResult(result));
             } catch (Exception e) {
                 Log.err(e);
