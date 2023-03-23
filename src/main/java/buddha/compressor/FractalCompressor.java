@@ -12,9 +12,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 // Доменные - большие
 // Ранговые - маленькие
 public class FractalCompressor extends Compressor {
-
     public static int rangeBlocksSize = 4;
     public static int rangeBlocksPerDomain = 2;
+
+    public FractalCompressor() {
+        super("Fractal");
+    }
 
     public Pixmap compress(Pixmap pixmap) {
         var domainBlocks = new Seq<Block>();
@@ -80,8 +83,8 @@ public class FractalCompressor extends Compressor {
     }
 
     @Override
-    public Table build(Table table) {
-        return table;
+    public void build(Table table) {
+
     }
 
 //    private static float getDifference(int[] domainBlock, int[] rangeBlock) {

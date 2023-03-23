@@ -1,17 +1,18 @@
 package buddha.ui;
 
 import arc.graphics.Color;
-import arc.scene.ui.*;
-import arc.scene.ui.ProgressBar.ProgressBarStyle;
 import arc.scene.ui.Button.ButtonStyle;
 import arc.scene.ui.ImageButton.ImageButtonStyle;
 import arc.scene.ui.Label.LabelStyle;
+import arc.scene.ui.ProgressBar.ProgressBarStyle;
 import arc.scene.ui.Slider.SliderStyle;
 import arc.scene.ui.TextButton.TextButtonStyle;
 
 import static arc.Core.scene;
 
 public class Styles {
+
+    public static TextButtonStyle checkTextButton;
 
     public static void load() {
         scene.addStyle(ButtonStyle.class, new ButtonStyle());
@@ -26,6 +27,19 @@ public class Styles {
             over = Textures.button_over;
             disabled = Textures.button_disabled;
         }});
+
+        checkTextButton = new TextButtonStyle() {{
+            font = Fonts.font;
+            fontColor = Color.white;
+            checkedFontColor = Color.lime;
+            disabledFontColor = Color.gray;
+
+            down = Textures.button_down;
+            up = Textures.button;
+            over = Textures.button_over;
+            checked = Textures.button_down;
+            disabled = Textures.button_disabled;
+        }};
 
         scene.addStyle(ImageButtonStyle.class, new ImageButtonStyle() {{
             imageDownColor = Color.green;

@@ -1,17 +1,19 @@
 package buddha.compressor;
 
 import arc.graphics.Pixmap;
-import arc.scene.event.Touchable;
 import arc.scene.ui.layout.Table;
 import arc.util.Align;
 
 public class AverageColorCompressor extends Compressor {
-
     public int blockSize = 16;
 
     public boolean compressing;
     public float total;
     public float current;
+
+    public AverageColorCompressor() {
+        super("Average");
+    }
 
     public Pixmap compress(Pixmap pixmap) {
         var compressed = new Pixmap(pixmap.width, pixmap.height);
@@ -56,19 +58,15 @@ public class AverageColorCompressor extends Compressor {
     }
 
     @Override
-    public Table build(Table table) {
-        table.bottom();
-
-        table.label(() -> "Размер блока: [yellow]" + blockSize).labelAlign(Align.center).touchable(Touchable.disabled).labelAlign(Align.left).left().row();
+    public void build(Table table) {
+        table.label(() -> "Размер блока: [yellow]" + blockSize).labelAlign(Align.center).left().row();
         table.slider(1, 128, 1, blockSize, value -> blockSize = (int) value).padTop(24f).width(240f).align(Align.left);
 
         table.row();
 
-        table.label(() -> "Уровень сжатия: [yellow]ничего не делает").labelAlign(Align.center).touchable(Touchable.disabled).padTop(32f).labelAlign(Align.left).left().row();
+        table.label(() -> "Уровень сжатия: [yellow]1000-7").labelAlign(Align.center).padTop(48f).left().row();
         table.slider(2, 16, 1, 0, value -> {
         }).padTop(24f).width(240f).align(Align.left);
-
-        return table;
     }
 
     private static int getAverageColor(int[] block) {
