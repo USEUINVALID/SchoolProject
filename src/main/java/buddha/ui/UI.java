@@ -19,6 +19,7 @@ import arc.util.*;
 import buddha.compressor.AverageColorCompressor;
 import buddha.compressor.Compressor;
 import buddha.compressor.FractalCompressor;
+import buddha.compressor.AnotherCompressor;
 import buddha.utils.FileChooserFilter;
 
 import javax.swing.*;
@@ -35,8 +36,9 @@ public class UI implements ApplicationListener {
 
     public Compressor average = new AverageColorCompressor();
     public Compressor fractal = new FractalCompressor();
+    public Compressor another = new AnotherCompressor();
 
-    public final Seq<Compressor> compressors = Seq.with(average, fractal, average);
+    public final Seq<Compressor> compressors = Seq.with(average, fractal, another);
 
     public Compressor current = average;
     public Table currentTable;

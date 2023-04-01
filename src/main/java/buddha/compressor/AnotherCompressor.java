@@ -1,5 +1,10 @@
 package buddha.compressor;
 
+import arc.scene.ui.layout.Table;
+
 public class AnotherCompressor {
-    public AnotherCompressor() {super();}
+    public void build(Table table) {
+
+    }
+    public AnotherCompressor() {super("Another");}
 }
