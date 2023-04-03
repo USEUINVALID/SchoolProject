@@ -7,6 +7,7 @@ import arc.scene.style.Drawable;
 import arc.scene.style.NinePatchDrawable;
 import arc.util.serialization.JsonReader;
 import arc.util.serialization.JsonValue;
+import buddha.Main;
 
 import static arc.Core.atlas;
 import static arc.Core.files;
@@ -31,12 +32,12 @@ public class Textures {
         button_down = load("button-down");
         button_disabled = load("button-disabled");
 
-        slider_before = ((NinePatchDrawable) white_knob).tint(Color.blue);
+        slider_before = ((NinePatchDrawable) white_knob).tint(Main.active);
         slider_after = ((NinePatchDrawable) white_knob).tint(Color.darkGray);
 
-        slider_knob = ((NinePatchDrawable) white_rounded).tint(Color.blue);
-        slider_knob_over = ((NinePatchDrawable) white_rounded).tint(Color.blue);
-        slider_knob_down = ((NinePatchDrawable) white_rounded).tint(Color.blue);
+        slider_knob = ((NinePatchDrawable) white_rounded).tint(Main.active);
+        slider_knob_over = ((NinePatchDrawable) white_rounded).tint(Main.active);
+        slider_knob_down = ((NinePatchDrawable) white_rounded).tint(Main.active);
 
         atlas.setErrorRegion("error");
     }

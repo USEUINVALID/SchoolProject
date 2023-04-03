@@ -4,6 +4,7 @@ import arc.ApplicationCore;
 import arc.Files.FileType;
 import arc.backend.sdl.SdlApplication;
 import arc.backend.sdl.SdlConfig;
+import arc.graphics.Color;
 import arc.graphics.g2d.SortedSpriteBatch;
 import arc.graphics.g2d.TextureAtlas;
 import arc.scene.Scene;
@@ -20,6 +21,8 @@ import static arc.Core.*;
 
 public final class Main extends ApplicationCore {
 
+    public static final Color active = Color.valueOf("#007fff");
+
     public static void main(String[] args) {
         new SdlApplication(new Main(), new SdlConfig() {{
             title = "Image Compressor v0.1-pre-alpha";
@@ -30,10 +33,9 @@ public final class Main extends ApplicationCore {
             resizable = false;
             disableAudio = true;
 
-            setWindowIcon(FileType.internal, "test.png");
+            setWindowIcon(FileType.internal, "textures/error.png");
         }});
     }
-
 
     @Override
     public void setup() {

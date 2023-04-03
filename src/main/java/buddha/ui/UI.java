@@ -19,7 +19,7 @@ import arc.util.*;
 import buddha.compressor.AverageColorCompressor;
 import buddha.compressor.Compressor;
 import buddha.compressor.FractalCompressor;
-import buddha.compressor.AnotherCompressor;
+import buddha.utils.FileChooser;
 import buddha.utils.FileChooserFilter;
 
 import javax.swing.*;
@@ -31,19 +31,21 @@ public class UI implements ApplicationListener {
     public final WidgetGroup root = new WidgetGroup();
     public final Fi tempFile = Fi.tempFile("compressor");
 
-    public Fi selected;
-    public JFileChooser chooser;
+    public Fi source;
+    public JFileChooser load;
+
+    public Pixmap result;
+    public JFileChooser save;
 
     public Compressor average = new AverageColorCompressor();
     public Compressor fractal = new FractalCompressor();
-    public Compressor another = new AnotherCompressor();
 
-    public final Seq<Compressor> compressors = Seq.with(average, fractal, another);
+    public final Seq<Compressor> compressors = Seq.with(average, fractal);
 
     public Compressor current = average;
     public Table currentTable;
 
-    public Image source, result;
+    public Image sourceImage, resultImage;
     public Label sourceSize, resultSize;
 
     @Override
@@ -57,32 +59,32 @@ public class UI implements ApplicationListener {
         root.fill(table -> {
             table.top();
 
-            source = table.image(Textures.error).scaling(Scaling.fit).pad(32f, 32f, 32f, 32f).size(320f).get();
-            result = table.image(Textures.error).scaling(Scaling.fit).pad(32f, 32f, 32f, 32f).size(320f).get();
+            sourceImage = table.image(Textures.error).scaling(Scaling.fit).pad(32f, 32f, 32f, 32f).size(320f).get();
+            resultImage = table.image(Textures.error).scaling(Scaling.fit).pad(32f, 32f, 32f, 32f).size(320f).get();
 
             table.row();
 
             sourceSize = table.add("").get();
-            resultSize = table.add("").visible(() -> !current.compressing()).get();
+            resultSize = table.add("").visible(() -> !current.compressing).get();
         });
 
         root.fill(table -> {
             table.center();
 
             table.add(new ProgressBar(0f, 100f, 0.1f, false, scene.getStyle(ProgressBarStyle.class)))
-                    .visible(current::compressing)
+                    .visible(() -> current.compressing)
                     .update(bar -> bar.setValue(current.progress()))
                     .width(330f)
                     .padLeft(385f)
                     .get();
 
             table.row();
-            table.label(() -> Strings.autoFixed(current.progress(), 2) + "%").visible(current::compressing).padLeft(385f);
+            table.label(() -> Strings.autoFixed(current.progress(), 2) + "%").visible(() -> current.compressing).padLeft(385f);
         });
 
         root.fill(table -> {
-            table.center().left();
-            table.margin(288f, 80f, 0f, 0f);
+            table.top().left();
+            table.margin(488f, 80f, 0f, 0f);
 
             current.build(table);
             currentTable = table;
@@ -92,21 +94,22 @@ public class UI implements ApplicationListener {
             table.center().left();
             table.margin(320f, 410f, 0f, 0f);
 
-            table.label(() -> "Алгоритм сжатия: " + current.name).labelAlign(Align.left).padBottom(16f).left().row();
+            table.label(() -> "Алгоритм сжатия: [yellow]" + current.name).labelAlign(Align.left).padBottom(16f).left().row();
 
             compressors.each(compressor -> table.button(compressor.name, Styles.checkTextButton, () -> {
                 current = compressor;
 
                 currentTable.clear();
                 current.build(currentTable);
-            }).checked(button -> current == compressor).width(320f).padTop(8f).left().row());
+            }).checked(button -> current == compressor).disabled(button -> current.compressing).width(320f).padTop(8f).left().row());
         });
 
         root.fill(table -> {
             table.bottom();
 
-            table.button("Выбрать файл", this::showFileChooser).disabled(button -> chooser != null && chooser.isShowing()).center().width(320f).height(80f).pad(24f, 0f, 24f, 6f);
-            table.button("Сжать изображение", this::compressImage).disabled(button -> selected == null || !selected.exists()).center().width(320f).height(80f).pad(24f, 6f, 24f, 0f);
+            table.button("Выбрать файл", this::showLoadDialog).disabled(button -> load != null && load.isShowing()).center().width(220f).height(80f).pad(24f, 0f, 24f, 4f);
+            table.button("Сжать изображение", this::compressImage).disabled(button -> source == null || !source.exists() || current.compressing).center().width(220f).height(80f).pad(24f, 4f, 24f, 4f);
+            table.button("Сохранить результат", this::showSaveDialog).disabled(button -> result == null || (save != null && save.isShowing())).center().width(220f).height(80f).pad(24f, 4f, 24f, 0f);
         });
     }
 
@@ -125,30 +128,32 @@ public class UI implements ApplicationListener {
 
     @Override
     public void dispose() {
-        if (chooser != null)
-            chooser.cancelSelection();
+        if (load != null)
+            load.cancelSelection();
+
+        if (save != null)
+            save.cancelSelection();
     }
 
-    public void showFileChooser() {
+    public void showLoadDialog() {
         Threads.daemon(() -> {
-            chooser = new JFileChooser(OS.userHome);
-            chooser.setDialogTitle("Выберите изображение для сжатия...");
+            load = new FileChooser(OS.userHome, "Выберите изображение для сжатия...", "textures/error.png");
 
-            chooser.setAcceptAllFileFilterUsed(false);
-            chooser.addChoosableFileFilter(new FileChooserFilter("Compressible image (png, jpg, jpeg)", "png", "jpg", "jpeg"));
-            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            load.setAcceptAllFileFilterUsed(false);
+            load.addChoosableFileFilter(new FileChooserFilter("Compressible image (png, jpg, jpeg)", "png", "jpg", "jpeg"));
+            load.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-            int option = chooser.showOpenDialog(null);
+            int option = load.showOpenDialog(null);
             if (option != JFileChooser.APPROVE_OPTION) return;
 
-            app.post(() -> updateSelected(new Fi(chooser.getSelectedFile())));
+            app.post(() -> updateSelected(new Fi(load.getSelectedFile())));
         });
     }
 
     public void compressImage() {
         Threads.daemon(() -> {
             try {
-                var result = current.compress(new Pixmap(selected));
+                var result = current.compress(new Pixmap(source));
                 app.post(() -> updateResult(result));
             } catch (Exception e) {
                 Log.err(e);
@@ -156,23 +161,43 @@ public class UI implements ApplicationListener {
         });
     }
 
+    public void showSaveDialog() {
+        Threads.daemon(() -> {
+            save = new FileChooser(OS.userHome, "Выберите файл для сохранения...", "textures/error.png");
+
+            save.setAcceptAllFileFilterUsed(false);
+            save.addChoosableFileFilter(new FileChooserFilter("PNG image (png)", "png"));
+            save.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+            int option = save.showSaveDialog(null);
+            if (option != JFileChooser.APPROVE_OPTION) return;
+
+            app.post(() -> saveResult(new Fi(save.getSelectedFile())));
+        });
+    }
+
     public void updateSelected(Fi selected) {
-        this.selected = selected;
+        this.source = selected;
+        updateImage(sourceImage, sourceSize, "Размер до: [yellow]", new Pixmap(selected));
 
-        updateImage(source, sourceSize, "Размер до:[yellow]", new Pixmap(selected));
-
-        this.result.setDrawable(Textures.error);
+        this.resultImage.setDrawable(Textures.error);
         this.resultSize.setText("");
     }
 
-    public void updateResult(Pixmap pixmap) {
-        updateImage(result, resultSize, "Размер после:[yellow]", pixmap);
+    public void updateResult(Pixmap result) {
+        this.result = result;
+        updateImage(resultImage, resultSize, "Размер после: [yellow]", result);
+    }
+
+    public void saveResult(Fi selected) {
+        PixmapIO.writePng(selected, result);
+        app.openFolder(selected.absolutePath()); // TODO
     }
 
     public void updateImage(Image image, Label label, String text, Pixmap pixmap) {
         try {
             image.setDrawable(new TextureRegion(new Texture(pixmap)));
-            label.setText(text + " " + getSize(pixmap));
+            label.setText(text + getSize(pixmap));
         } catch (Exception e) {
             image.setDrawable(Textures.error);
             label.setText("[scarlet]Ошибка получения данных файла");

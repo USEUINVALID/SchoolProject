@@ -4,10 +4,8 @@ import arc.graphics.Pixmap;
 import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
-import arc.util.Log;
+import arc.util.Align;
 import com.github.bsideup.jabel.Desugar;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 // Доменные - большие
 // Ранговые - маленькие
@@ -51,11 +49,14 @@ public class FractalCompressor extends Compressor {
             }
         }
 
-        var counter = new AtomicInteger();
+        start(domainBlocks.size);
+
         var result = domainBlocks.map(domainBlock -> {
-            Log.info("Processing block @ / @", counter.incrementAndGet(), domainBlocks.size);
+            current++;
             return rangeBlocks.min(rangeBlock -> getDifference(domainBlock.average, rangeBlock.average));
         }).reverse();
+
+        end();
 
         var compressed = new Pixmap(pixmap.width / rangeBlocksPerDomain, pixmap.height / rangeBlocksPerDomain);
         for (int y = 0; y < compressed.height; y += rangeBlocksSize) {
@@ -66,6 +67,8 @@ public class FractalCompressor extends Compressor {
                 for (int yy = y; yy < y + rangeBlocksSize; yy++)
                     for (int xx = x; xx < x + rangeBlocksSize; xx++)
                         compressed.set(xx, yy, block.colors[index++]);
+
+                current++;
             }
         }
 
@@ -73,27 +76,15 @@ public class FractalCompressor extends Compressor {
     }
 
     @Override
-    public boolean compressing() {
-        return true;
-    }
-
-    @Override
-    public float progress() {
-        return Mathf.random(100f);
-    }
-
-    @Override
     public void build(Table table) {
+        table.label(() -> "Размер рангового блока: [yellow]" + rangeBlocksSize).labelAlign(Align.center).left().row();
+        table.slider(2, 64, 1, rangeBlocksSize, value -> rangeBlocksSize = (int) value).disabled(slider -> compressing).padTop(24f).width(240f).align(Align.left);
 
+        table.row();
+
+        table.label(() -> "Ранговых блоков в доменном: [yellow]" + rangeBlocksPerDomain).labelAlign(Align.center).padTop(48f).left().row();
+        table.slider(2, 16, 1, rangeBlocksPerDomain, value -> rangeBlocksPerDomain = (int) value).disabled(slider -> compressing).padTop(24f).width(240f).align(Align.left);
     }
-
-//    private static float getDifference(int[] domainBlock, int[] rangeBlock) {
-//        float difference = 0f;
-//        for (int i = 0; i < domainBlock.length; i++)
-//            difference += getDifference(domainBlock[i], rangeBlock[i / rangeBlocksPerDomain / rangeBlocksPerDomain]);
-//
-//        return difference;
-//    }
 
     private static float getDifference(int color1, int color2) {
         int r1 = (color1 >> 24) & 0xFF;

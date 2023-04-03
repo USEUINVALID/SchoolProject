@@ -7,6 +7,7 @@ import arc.scene.ui.Label.LabelStyle;
 import arc.scene.ui.ProgressBar.ProgressBarStyle;
 import arc.scene.ui.Slider.SliderStyle;
 import arc.scene.ui.TextButton.TextButtonStyle;
+import buddha.Main;
 
 import static arc.Core.scene;
 
@@ -31,7 +32,6 @@ public class Styles {
         checkTextButton = new TextButtonStyle() {{
             font = Fonts.font;
             fontColor = Color.white;
-            checkedFontColor = Color.lime;
             disabledFontColor = Color.gray;
 
             down = Textures.button_down;
@@ -42,7 +42,7 @@ public class Styles {
         }};
 
         scene.addStyle(ImageButtonStyle.class, new ImageButtonStyle() {{
-            imageDownColor = Color.green;
+            imageDownColor = Main.active;
             imageOverColor = Color.lightGray;
             imageDisabledColor = Color.gray;
 

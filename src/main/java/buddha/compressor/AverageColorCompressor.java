@@ -7,20 +7,13 @@ import arc.util.Align;
 public class AverageColorCompressor extends Compressor {
     public int blockSize = 16;
 
-    public boolean compressing;
-    public float total;
-    public float current;
-
     public AverageColorCompressor() {
         super("Average");
     }
 
     public Pixmap compress(Pixmap pixmap) {
         var compressed = new Pixmap(pixmap.width, pixmap.height);
-
-        compressing = true;
-        total = (float) (pixmap.width * pixmap.height) / (blockSize * blockSize);
-        current = 0f;
+        start((float) (pixmap.width * pixmap.height) / (blockSize * blockSize));
 
         for (int x = 0; x < pixmap.width; x += blockSize) {
             for (int y = 0; y < pixmap.height; y += blockSize) {
@@ -40,33 +33,15 @@ public class AverageColorCompressor extends Compressor {
             }
         }
 
-        compressing = false;
-        total = 0f;
-        current = 0f;
-
+        end();
         return compressed;
     }
 
-    @Override
-    public boolean compressing() {
-        return compressing;
-    }
-
-    @Override
-    public float progress() {
-        return compressing ? current / total * 100f : 0f;
-    }
 
     @Override
     public void build(Table table) {
         table.label(() -> "Размер блока: [yellow]" + blockSize).labelAlign(Align.center).left().row();
-        table.slider(1, 128, 1, blockSize, value -> blockSize = (int) value).padTop(24f).width(240f).align(Align.left);
-
-        table.row();
-
-        table.label(() -> "Уровень сжатия: [yellow]1000-7").labelAlign(Align.center).padTop(48f).left().row();
-        table.slider(2, 16, 1, 0, value -> {
-        }).padTop(24f).width(240f).align(Align.left);
+        table.slider(2, 64, 1, blockSize, value -> blockSize = (int) value).padTop(24f).width(240f).align(Align.left);
     }
 
     private static int getAverageColor(int[] block) {
