@@ -37,22 +37,21 @@ public class AverageColorCompressor extends Compressor {
         return compressed;
     }
 
-
     @Override
     public void build(Table table) {
         table.label(() -> "Размер блока: [yellow]" + blockSize).labelAlign(Align.center).left().row();
         table.slider(2, 64, 1, blockSize, value -> blockSize = (int) value).padTop(24f).width(240f).align(Align.left);
     }
 
-    private static int getAverageColor(int[] block) {
-        int r = 0, g = 0, b = 0, a = 0;
-        for (int color : block) {
-            r += (color >> 24) & 0xFF;
-            g += (color >> 16) & 0xFF;
-            b += (color >> 8) & 0xFF;
-            a += color & 0xFF;
+    private static int getAverageColor(int[] colors) {
+        int red = 0, green = 0, blue = 0, alpha = 0;
+        for (int color : colors) {
+            red += (color >> 24) & 0xFF;
+            green += (color >> 16) & 0xFF;
+            blue += (color >> 8) & 0xFF;
+            alpha += color & 0xFF;
         }
 
-        return ((r / block.length) << 24) | ((g / block.length) << 16) | ((b / block.length) << 8) | (a / block.length);
+        return ((red / colors.length) << 24) | ((green / colors.length) << 16) | ((blue / colors.length) << 8) | (alpha / colors.length);
     }
 }

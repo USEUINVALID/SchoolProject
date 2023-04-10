@@ -1,9 +1,11 @@
 package buddha.utils;
 
-import arc.files.Fi;
+import arc.util.Log;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 import static arc.Core.files;
 
@@ -23,8 +25,10 @@ public class FileChooser extends JFileChooser {
     public JDialog createDialog(Component parent) throws HeadlessException {
         var dialog = super.createDialog(parent);
 
-        dialog.setTitle(title);
-        dialog.setIconImage(new ImageIcon(files.internal(icon).path()).getImage());
+        try {
+            dialog.setTitle(title);
+            dialog.setIconImage(ImageIO.read(files.internal(icon).read()));
+        } catch (IOException ignored) {}
 
         return dialog;
     }

@@ -1,7 +1,6 @@
 package buddha.compressor;
 
 import arc.graphics.Pixmap;
-import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
 import arc.util.Align;
@@ -86,32 +85,27 @@ public class FractalCompressor extends Compressor {
         table.slider(2, 16, 1, rangeBlocksPerDomain, value -> rangeBlocksPerDomain = (int) value).disabled(slider -> compressing).padTop(24f).width(240f).align(Align.left);
     }
 
-    private static float getDifference(int color1, int color2) {
-        int r1 = (color1 >> 24) & 0xFF;
-        int g1 = (color1 >> 16) & 0xFF;
-        int b1 = (color1 >> 8) & 0xFF;
-
-        int r2 = (color2 >> 24) & 0xFF;
-        int g2 = (color2 >> 16) & 0xFF;
-        int b2 = (color2 >> 8) & 0xFF;
-
-        return Mathf.sqrt((r1 - r2) * (r1 - r2) + (g1 - g2) * (g1 - g2) + (b1 - b2) * (b1 - b2)) / (255f * 2f);
+    private static float getDifference(int[] color1, int[] color2) {
+        return Math.abs(color1[0] - color2[0])
+                + Math.abs(color1[1] - color2[1])
+                + Math.abs(color1[2] - color2[2])
+                + Math.abs(color1[3] - color2[3]);
     }
 
-    private static int getAverageColor(int[] colors) {
-        int r = 0, g = 0, b = 0, a = 0;
+    private static int[] getAverageColor(int[] colors) {
+        int red = 0, green = 0, blue = 0, alpha = 0;
         for (int color : colors) {
-            r += (color >> 24) & 0xFF;
-            g += (color >> 16) & 0xFF;
-            b += (color >> 8) & 0xFF;
-            a += color & 0xFF;
+            red += (color >> 24) & 0xFF;
+            green += (color >> 16) & 0xFF;
+            blue += (color >> 8) & 0xFF;
+            alpha += color & 0xFF;
         }
 
-        return ((r / colors.length) << 24) | ((g / colors.length) << 16) | ((b / colors.length) << 8) | (a / colors.length);
+        return new int[] {red / colors.length, green / colors.length, blue / colors.length, alpha / colors.length};
     }
 
     @Desugar
-    public record Block(int[] colors, int average) {
+    public record Block(int[] colors, int[] average) {
         public Block(int[] colors) {
             this(colors, getAverageColor(colors));
         }

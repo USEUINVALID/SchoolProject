@@ -22,6 +22,7 @@ import static arc.Core.*;
 public final class Main extends ApplicationCore {
 
     public static final Color active = Color.valueOf("#007fff");
+    public static final UI ui = new UI();
 
     public static void main(String[] args) {
         new SdlApplication(new Main(), new SdlConfig() {{
@@ -49,7 +50,7 @@ public final class Main extends ApplicationCore {
         Fonts.load();
         Styles.load();
 
-        add(new UI());
+        add(ui);
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
