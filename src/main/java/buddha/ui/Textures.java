@@ -12,6 +12,7 @@ import buddha.Main;
 import static arc.Core.atlas;
 import static arc.Core.files;
 
+// Класс для загрузки и хранения текстур
 public class Textures {
 
     public static JsonValue splits;
@@ -42,9 +43,10 @@ public class Textures {
         atlas.setErrorRegion("error");
     }
 
+    // Загружает текстуру по названию
     public static Drawable load(String name) {
         var texture = new Texture("textures/" + name + ".png");
-        texture.setFilter(TextureFilter.linear); // for better experience
+        texture.setFilter(TextureFilter.linear); // Настраиваем фильтрацию текстуры
 
         var region = atlas.addRegion(name, texture, 0, 0, texture.width, texture.height);
         if (splits.has(name)) region.splits = splits.get(name).asIntArray();

@@ -25,15 +25,21 @@ public final class Main extends ApplicationCore {
     public static final UI ui = new UI();
 
     public static void main(String[] args) {
+        // Создаем новое SDL приложение
         new SdlApplication(new Main(), new SdlConfig() {{
+            // Настраиваем заголовок окна
             title = "Image Compressor v0.1-pre-alpha";
 
+            // Настраиваем размеры окна
             width = 800;
             height = 800;
 
+            // Выключаем изменение размера окна
             resizable = false;
+            // Выключаем аудио-модуль, он нам не понадобится
             disableAudio = true;
 
+            // Задаем иконку окна
             setWindowIcon(FileType.internal, "textures/error.png");
         }});
     }
@@ -42,16 +48,20 @@ public final class Main extends ApplicationCore {
     public void setup() {
         Time.mark();
 
+        // Создаем пакет отсортированных спрайтов, сцену и атлас
         batch = new SortedSpriteBatch();
         scene = new Scene();
         atlas = TextureAtlas.blankAtlas();
 
+        // Загружаем текстуры, слои и стили
         Textures.load();
         Fonts.load();
         Styles.load();
 
+        // Добавляем UI как один из модулей приложения: он будет инициализироваться, обновляться и выключаться
         add(ui);
 
+        // Устанавливаем внешний вид swing-компонентов на системный
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) {}

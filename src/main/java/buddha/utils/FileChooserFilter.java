@@ -5,6 +5,7 @@ import arc.files.Fi;
 import javax.swing.filechooser.FileFilter;
 import java.io.File;
 
+// Фильтр для файлов, который принимает несколько расширений вместо одного
 public class FileChooserFilter extends FileFilter {
     public final String description;
     public final String[] extensions;

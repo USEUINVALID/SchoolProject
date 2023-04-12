@@ -1,7 +1,5 @@
 package buddha.utils;
 
-import arc.util.Log;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -9,6 +7,7 @@ import java.io.IOException;
 
 import static arc.Core.files;
 
+// Наследует обычный JFileChooser, имеет отдельное поле для изменения иконки окна
 public class FileChooser extends JFileChooser {
 
     public final String title;

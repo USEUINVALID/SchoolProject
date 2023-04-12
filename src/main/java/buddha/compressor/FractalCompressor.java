@@ -1,13 +1,13 @@
 package buddha.compressor;
 
 import arc.graphics.Pixmap;
+import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
 import arc.util.Align;
 import com.github.bsideup.jabel.Desugar;
 
-// Доменные - большие
-// Ранговые - маленькие
+// Реализация фрактального сжатия на основе похожего цвета
 public class FractalCompressor extends Compressor {
     public static int rangeBlocksSize = 4;
     public static int rangeBlocksPerDomain = 2;
@@ -17,82 +17,92 @@ public class FractalCompressor extends Compressor {
     }
 
     public Pixmap compress(Pixmap pixmap) {
-        var domainBlocks = new Seq<Block>();
         var rangeBlocks = new Seq<Block>();
 
-        int domainBlocksSize = rangeBlocksSize * rangeBlocksPerDomain;
-
-        for (int y = 0; y < pixmap.height; y += domainBlocksSize) {
-            for (int x = 0; x < pixmap.width; x += domainBlocksSize) {
-                var colors = new int[domainBlocksSize * domainBlocksSize];
-
-                int index = 0;
-                for (int yy = y; yy < y + domainBlocksSize; yy++)
-                    for (int xx = x; xx < x + domainBlocksSize; xx++)
-                        colors[index++] = pixmap.get(xx, yy);
-
-                domainBlocks.add(new Block(colors));
-            }
-        }
-
+        // Создаем ранговые блоки
         for (int y = 0; y < pixmap.height; y += rangeBlocksSize) {
             for (int x = 0; x < pixmap.width; x += rangeBlocksSize) {
                 var colors = new int[rangeBlocksSize * rangeBlocksSize];
 
-                int index = 0;
-                for (int yy = y; yy < y + rangeBlocksSize; yy++)
-                    for (int xx = x; xx < x + rangeBlocksSize; xx++)
-                        colors[index++] = pixmap.get(xx, yy);
+                // Заполняем ранговый блок
+                for (int cx = 0; cx < rangeBlocksSize; cx++)
+                    for (int cy = 0; cy < rangeBlocksSize; cy++)
+                        colors[cx + cy * rangeBlocksSize] = pixmap.get(x + cx, y + cy);
 
+                // Создаем ранговый блок
                 rangeBlocks.add(new Block(colors));
             }
         }
 
-        start(domainBlocks.size);
+        var compressed = new Pixmap(pixmap.width, pixmap.height);
 
-        var result = domainBlocks.map(domainBlock -> {
-            current++;
-            return rangeBlocks.min(rangeBlock -> getDifference(domainBlock.average, rangeBlock.average));
-        }).reverse();
+        // Вычисляем размер доменного блока и общее количество блоков
+        int domainBlocksSize = rangeBlocksSize * rangeBlocksPerDomain;
+        start((float) (pixmap.width * pixmap.height) / (domainBlocksSize * domainBlocksSize));
 
-        end();
+        // Создаем доменные блоки и заменяем их ранговыми
+        for (int y = 0; y < pixmap.height; y += domainBlocksSize) {
+            for (int x = 0; x < pixmap.width; x += domainBlocksSize) {
+                var colors = new int[domainBlocksSize * domainBlocksSize];
 
-        var compressed = new Pixmap(pixmap.width / rangeBlocksPerDomain, pixmap.height / rangeBlocksPerDomain);
-        for (int y = 0; y < compressed.height; y += rangeBlocksSize) {
-            for (int x = 0; x < compressed.width; x += rangeBlocksSize) {
-                var block = result.pop();
+                // Заполняем доменный блок
+                for (int cx = 0; cx < domainBlocksSize; cx++)
+                    for (int cy = 0; cy < domainBlocksSize; cy++)
+                        colors[cx + cy * domainBlocksSize] = pixmap.get(x + cx, y + cy);
 
-                int index = 0;
-                for (int yy = y; yy < y + rangeBlocksSize; yy++)
-                    for (int xx = x; xx < x + rangeBlocksSize; xx++)
-                        compressed.set(xx, yy, block.colors[index++]);
+                // Создаем доменный блок
+                var domainBlock = new Block(colors);
+
+                // Находим ранговый блок, максимально близкий к доменному
+                var rangeBlock = rangeBlocks.min(block -> getDifference(domainBlock.average, block.average));
+
+                // Заменяем доменный блок ранговым
+                for (int cx = 0; cx < rangeBlocksSize; cx++) {
+                    for (int cy = 0; cy < rangeBlocksSize; cy++) {
+                        int color = rangeBlock.colors[cx + cy * rangeBlocksSize];
+                        for (int sx = 0; sx < rangeBlocksPerDomain; sx++)
+                            for (int sy = 0; sy < rangeBlocksPerDomain; sy++)
+                                compressed.set(x + cx * rangeBlocksPerDomain + sx, y + cy * rangeBlocksPerDomain + sy, color);
+                    }
+                }
 
                 current++;
             }
         }
 
+        end();
         return compressed;
     }
 
     @Override
     public void build(Table table) {
+        // Добавляем слайдер для размера рангового блока
         table.label(() -> "Размер рангового блока: [yellow]" + rangeBlocksSize).labelAlign(Align.center).left().row();
         table.slider(2, 64, 1, rangeBlocksSize, value -> rangeBlocksSize = (int) value).disabled(slider -> compressing).padTop(24f).width(240f).align(Align.left);
 
+        // Переходим на новый ряд
         table.row();
 
+        // Добавляем слайдер для количества ранговых блоков в доменном
         table.label(() -> "Ранговых блоков в доменном: [yellow]" + rangeBlocksPerDomain).labelAlign(Align.center).padTop(48f).left().row();
         table.slider(2, 16, 1, rangeBlocksPerDomain, value -> rangeBlocksPerDomain = (int) value).disabled(slider -> compressing).padTop(24f).width(240f).align(Align.left);
     }
 
-    private static float getDifference(int[] color1, int[] color2) {
-        return Math.abs(color1[0] - color2[0])
-                + Math.abs(color1[1] - color2[1])
-                + Math.abs(color1[2] - color2[2])
-                + Math.abs(color1[3] - color2[3]);
+    // Вычисляет разницу между двумя RGB цветами
+    private static float getDifference(int color1, int color2) {
+        int red1 = (color1 >> 24) & 0xFF;
+        int green1 = (color1 >> 16) & 0xFF;
+        int blue1 = (color1 >> 8) & 0xFF;
+
+        int red2 = (color2 >> 24) & 0xFF;
+        int green2 = (color2 >> 16) & 0xFF;
+        int blue2 = (color2 >> 8) & 0xFF;
+
+        return Mathf.sqrt((red1 - red2) * (red1 - red2) + (green1 - green2) * (green1 - green2) + (blue1 - blue2) * (blue1 - blue2)) / (255f * 2f);
     }
 
-    private static int[] getAverageColor(int[] colors) {
+    // Вычисляет средний цвет для массива цветов
+    private static int getAverageColor(int[] colors) {
         int red = 0, green = 0, blue = 0, alpha = 0;
         for (int color : colors) {
             red += (color >> 24) & 0xFF;
@@ -101,11 +111,12 @@ public class FractalCompressor extends Compressor {
             alpha += color & 0xFF;
         }
 
-        return new int[] {red / colors.length, green / colors.length, blue / colors.length, alpha / colors.length};
+        return ((red / colors.length) << 24) | ((green / colors.length) << 16) | ((blue / colors.length) << 8) | (alpha / colors.length);
     }
 
+    // Хранит в себе массив цветов и средний цвет для них
     @Desugar
-    public record Block(int[] colors, int[] average) {
+    public record Block(int[] colors, int average) {
         public Block(int[] colors) {
             this(colors, getAverageColor(colors));
         }

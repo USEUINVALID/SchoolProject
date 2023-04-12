@@ -11,6 +11,7 @@ import buddha.Main;
 
 import static arc.Core.scene;
 
+// Класс для загрузки и хранения стилей
 public class Styles {
 
     public static TextButtonStyle checkTextButton;

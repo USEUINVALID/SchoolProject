@@ -7,6 +7,7 @@ import arc.graphics.g2d.Font;
 
 import static arc.Core.files;
 
+// Класс для загрузки и хранения шрифтов
 public class Fonts {
 
     public static Font font;
@@ -22,6 +23,7 @@ public class Fonts {
         font.getData().markupEnabled = true;
     }
 
+    // Загружает шрифт по названию
     public static Font load(String name, FreeTypeFontParameter parameter) {
         var generator = new FreeTypeFontGenerator(files.internal("fonts/" + name));
         return generator.generateFont(parameter);
