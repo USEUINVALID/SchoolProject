@@ -32,6 +32,7 @@ dependencies {
     implementation "com.github.Anuken.Arc:arc-core:$arcVersion"
     implementation "com.github.Anuken.Arc:backend-sdl:$arcVersion"
     implementation "com.github.Anuken.Arc:freetype:$arcVersion"
+    implementation "com.github.Anuken.Arc:flabel:$arcVersion"
 
     implementation "com.github.Anuken.Arc:natives-desktop:$arcVersion"
     implementation "com.github.Anuken.Arc:natives-freetype-desktop:$arcVersion"

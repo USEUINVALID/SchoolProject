@@ -2,6 +2,7 @@ package buddha.ui;
 
 import arc.ApplicationListener;
 import arc.files.Fi;
+import arc.flabel.*;
 import arc.graphics.Color;
 import arc.graphics.*;
 import arc.graphics.Texture.TextureFilter;
@@ -43,6 +44,8 @@ public class UI implements ApplicationListener {
 
     // Элементы, нужные для правильного отображения надписей, изображений и слайдеров
     public Table currentTable;
+    public FLabel currentName;
+
     public Image sourceImage, resultImage;
     public Label sourceSize, resultSize;
 
@@ -68,13 +71,13 @@ public class UI implements ApplicationListener {
         root.fill(table -> {
             table.top();
 
-            sourceImage = table.image(Textures.error).scaling(Scaling.fit).pad(32f, 32f, 32f, 32f).size(320f).get();
-            resultImage = table.image(Textures.error).scaling(Scaling.fit).pad(32f, 32f, 32f, 32f).size(320f).get();
+            table.add(sourceImage = new Image(Textures.error)).scaling(Scaling.fit).pad(32f, 32f, 32f, 32f).size(320f);
+            table.add(resultImage = new Image(Textures.error)).scaling(Scaling.fit).pad(32f, 32f, 32f, 32f).size(320f);
 
             table.row();
 
-            sourceSize = table.add("").get();
-            resultSize = table.add("").visible(() -> !current.compressing).get();
+            table.add(sourceSize = new Label(""));
+            table.add(resultSize = new Label("")).visible(() -> !current.compressing);
         });
 
         // Добавляем панель с прогрессом сжатия
@@ -103,10 +106,11 @@ public class UI implements ApplicationListener {
             table.center().left();
             table.margin(320f, 410f, 0f, 0f);
 
-            table.label(() -> "Алгоритм сжатия: [yellow]" + current.name).labelAlign(Align.left).padBottom(16f).left().row();
+            table.add(currentName = new FLabel("Алгоритм сжатия: {rainbow}" + current.name)).labelAlign(Align.left).padBottom(16f).left().row();
 
             compressors.each(compressor -> table.button(compressor.name, Styles.checkTextButton, () -> {
                 current = compressor;
+                currentName.restart("Алгоритм сжатия: {rainbow}" + current.name);
 
                 currentTable.clear();
                 current.build(currentTable);
