@@ -182,7 +182,10 @@ public class UI implements ApplicationListener {
             int option = save.showSaveDialog(null);
             if (option != JFileChooser.APPROVE_OPTION) return; // Проверяем, выбрал ли пользователь файл
 
-            app.post(() -> saveResult(new Fi(save.getSelectedFile())));
+            app.post(() -> {
+                var file = new Fi(save.getSelectedFile());
+                saveResult(file.sibling(file.nameWithoutExtension() + "." + source.extension()));
+            });
         });
     }
 
