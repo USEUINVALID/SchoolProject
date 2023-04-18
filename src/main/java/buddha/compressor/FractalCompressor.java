@@ -1,7 +1,6 @@
 package buddha.compressor;
 
 import arc.graphics.Pixmap;
-import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
 import arc.util.Align;
@@ -93,12 +92,17 @@ public class FractalCompressor extends Compressor {
         int red1 = (color1 >> 24) & 0xFF;
         int green1 = (color1 >> 16) & 0xFF;
         int blue1 = (color1 >> 8) & 0xFF;
+        int alpha1 = color1 & 0xFF;
 
         int red2 = (color2 >> 24) & 0xFF;
         int green2 = (color2 >> 16) & 0xFF;
         int blue2 = (color2 >> 8) & 0xFF;
+        int alpha2 = color2 & 0xFF;
 
-        return Mathf.sqrt((red1 - red2) * (red1 - red2) + (green1 - green2) * (green1 - green2) + (blue1 - blue2) * (blue1 - blue2)) / (255f * 2f);
+        return (Math.abs(red1 - red2) +
+                Math.abs(green1 - green2) +
+                Math.abs(blue1 - blue2) +
+                Math.abs(alpha1 - alpha2)) / 4f;
     }
 
     // Вычисляет средний цвет для массива цветов

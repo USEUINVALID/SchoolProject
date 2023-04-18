@@ -5,7 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 
-import static arc.Core.files;
+import static arc.Core.*;
 
 // Наследует обычный JFileChooser, имеет отдельное поле для изменения иконки окна
 public class FileChooser extends JFileChooser {

@@ -1,16 +1,12 @@
 package buddha.ui;
 
-import arc.graphics.Color;
-import arc.graphics.Texture;
+import arc.graphics.*;
 import arc.graphics.Texture.TextureFilter;
-import arc.scene.style.Drawable;
-import arc.scene.style.NinePatchDrawable;
-import arc.util.serialization.JsonReader;
-import arc.util.serialization.JsonValue;
+import arc.scene.style.*;
+import arc.util.serialization.*;
 import buddha.Main;
 
-import static arc.Core.atlas;
-import static arc.Core.files;
+import static arc.Core.*;
 
 // Класс для загрузки и хранения текстур
 public class Textures {

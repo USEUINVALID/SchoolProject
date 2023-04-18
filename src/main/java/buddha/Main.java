@@ -2,18 +2,12 @@ package buddha;
 
 import arc.ApplicationCore;
 import arc.Files.FileType;
-import arc.backend.sdl.SdlApplication;
-import arc.backend.sdl.SdlConfig;
+import arc.backend.sdl.*;
 import arc.graphics.Color;
-import arc.graphics.g2d.SortedSpriteBatch;
-import arc.graphics.g2d.TextureAtlas;
+import arc.graphics.g2d.*;
 import arc.scene.Scene;
-import arc.util.Log;
-import arc.util.Time;
-import buddha.ui.Fonts;
-import buddha.ui.Styles;
-import buddha.ui.Textures;
-import buddha.ui.UI;
+import arc.util.*;
+import buddha.ui.*;
 
 import javax.swing.*;
 

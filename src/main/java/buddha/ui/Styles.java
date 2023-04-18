@@ -9,7 +9,7 @@ import arc.scene.ui.Slider.SliderStyle;
 import arc.scene.ui.TextButton.TextButtonStyle;
 import buddha.Main;
 
-import static arc.Core.scene;
+import static arc.Core.*;
 
 // Класс для загрузки и хранения стилей
 public class Styles {

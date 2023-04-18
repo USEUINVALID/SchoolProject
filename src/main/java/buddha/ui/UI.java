@@ -2,14 +2,14 @@ package buddha.ui;
 
 import arc.ApplicationListener;
 import arc.files.Fi;
-import arc.graphics.*;
 import arc.graphics.Color;
+import arc.graphics.*;
 import arc.graphics.Texture.TextureFilter;
 import arc.graphics.g2d.TextureRegion;
 import arc.scene.event.Touchable;
-import arc.scene.ui.*;
 import arc.scene.ui.Image;
 import arc.scene.ui.Label;
+import arc.scene.ui.*;
 import arc.scene.ui.ProgressBar.ProgressBarStyle;
 import arc.scene.ui.layout.*;
 import arc.struct.Seq;
