@@ -76,15 +76,27 @@ public class FractalCompressor extends Compressor {
     @Override
     public void build(Table table) {
         // Добавляем слайдер для размера рангового блока
-        table.label(() -> "Размер рангового блока: [yellow]" + rangeBlocksSize).labelAlign(Align.center).left().row();
-        table.slider(2, 64, 1, rangeBlocksSize, value -> rangeBlocksSize = (int) value).disabled(slider -> compressing).padTop(24f).width(240f).align(Align.left);
+        table.label(() -> "Размер рангового блока: [yellow]" + rangeBlocksSize)
+                .labelAlign(Align.center)
+                .left().row();
+
+        table.slider(2, 64, 1, rangeBlocksSize, value -> rangeBlocksSize = (int) value)
+                .disabled(slider -> compressing)
+                .padTop(24f).width(240f)
+                .align(Align.left);
 
         // Переходим на новый ряд
         table.row();
 
         // Добавляем слайдер для количества ранговых блоков в доменном
-        table.label(() -> "Ранговых блоков в доменном: [yellow]" + rangeBlocksPerDomain).labelAlign(Align.center).padTop(48f).left().row();
-        table.slider(2, 16, 1, rangeBlocksPerDomain, value -> rangeBlocksPerDomain = (int) value).disabled(slider -> compressing).padTop(24f).width(240f).align(Align.left);
+        table.label(() -> "Ранговых блоков в доменном: [yellow]" + rangeBlocksPerDomain)
+                .labelAlign(Align.center)
+                .padTop(48f).left().row();
+
+        table.slider(2, 16, 1, rangeBlocksPerDomain, value -> rangeBlocksPerDomain = (int) value)
+                .disabled(slider -> compressing)
+                .padTop(24f).width(240f)
+                .align(Align.left);
     }
 
     // Вычисляет разницу между двумя RGB цветами
