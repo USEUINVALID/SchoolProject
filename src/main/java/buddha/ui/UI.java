@@ -29,8 +29,8 @@ import static arc.Core.*;
 // Класс, хранящий, загружающий, обновляющий и выключающий все элементы интерфейса
 public class UI implements ApplicationListener {
 
-    public final WidgetGroup root = new WidgetGroup();      // Корневой элемент интерфейса
-    public final Fi temp = Fi.tempFile("compressor"); // Временный файл для конвертации изображений
+    public final WidgetGroup root = new WidgetGroup(); // Корневой элемент интерфейса
+    public final Fi temp = Fi.tempFile("compressor");  // Временный файл для конвертации изображений
 
     public JFileChooser load; // Окно для выбора изображения для загрузки
     public JFileChooser save; // Окно для выбора файла для сохранения
